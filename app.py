@@ -33,7 +33,7 @@ def index():
     conn.close()
     
     # XSS vulnerability: Render query directly to template (we'll implement the actual XSS in the template)
-    return render_template('index.html', products=products, query=query)
+    return render_template('index.html', products=products, query=mark.escape(query))  # NEW
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
