@@ -1,0 +1,8 @@
+// Secure code pattern: check ownership before returning order details
+// In a controller method or endpoint logic, check if the authenticated user owns the order
+const order = await Order.findByPk(2);
+if (order && await order.isOwnedBy(req.user)) {
+  res.json(order);
+} else {
+  res.status(403).json({ error: 'Forbidden' });
+}
