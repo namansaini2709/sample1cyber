@@ -17,6 +17,14 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+@app.after_request
+def apply_http_headers(response):
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Content-Security-Policy'] = "default-src 'self';"
+    return response
+
 @app.route('/')
 def index():
     query = request.args.get('q', '')
@@ -121,7 +129,8 @@ def user_profile():
     
     if user:
         # VULNERABLE: Returning full user object including password hash and internal notes
-        return jsonify(dict(user))
+        # Safe response: return only public fields 
+        return jsonify({'name': user['name'], 'id': user['id']})
     return jsonify({"error": "User not found"}), 404
 
 @app.route('/.env')
@@ -130,7 +139,7 @@ def expose_env():
     # In a real app, web server config might prevent this, or it's misconfigured.
     # We deliberately serve it to simulate a misconfiguration.
     try:
-        return send_from_directory('.', '.env', mimetype='text/plain')
+        return send_from_directory('.', '.env', mimetype='text/plain',max_age=0)
     except Exception:
         return "File not found", 404
 
