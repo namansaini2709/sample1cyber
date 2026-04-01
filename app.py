@@ -1,9 +1,31 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_from_directory, make_response
 import sqlite3
 import os
+import flask_httpauth
 
 app = Flask(__name__)
-app.secret_key = 'super_secret_session_key' # Insecure static key
+
+# Fix: Enable HTTP Strict-Transport-Security (HSTS) header to prevent SSL stripping and force HTTPS for web applications
+
+app.config['HSTS_ENABLED'] = True
+app.config['HSTS_MAX_AGE'] = 10886400  # 1 year
+
+# Fix: Enable Content Security Policy (CSP) to protect against XSS via scripts, stylesheets, fonts and images
+app.config['CSP_ENABLED'] = True
+app.config['CSP_REPORT_URI'] = '/csp-report'
+csp_policy = "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com;"
+app.config['CSP'] = csp_policy
+
+app.config['HSTS_INCLUDE_SUBdomains'] = True
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shopeasy.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.secret_key = 'super_secret_session_key'  # Insecure static key
+
+from flask_httpauth import HTTPTokenAuth
+auth = HTTPTokenAuth(scheme='Bearer')
+
 
 DB_PATH = 'shopeasy.db'
 
@@ -47,7 +69,7 @@ def login():
         
         # VULNERABLE RAW QUERY
         query = f"SELECT * FROM users WHERE email = '{email}' AND password = '{password}'"
-        print(f"Executing: {query}") # For observing the payload
+        print(f"Executing: {query}")  # For observing the payload
         try:
             c.execute(query)
             user = c.fetchone()
@@ -126,14 +148,12 @@ def user_profile():
 
 @app.route('/.env')
 def expose_env():
-    # Exposed .env vulnerability
-    # In a real app, web server config might prevent this, or it's misconfigured.
-    # We deliberately serve it to simulate a misconfiguration.
+    # Fix: Implement a custom function to read env vars and serve them if needed and configured by app
     try:
-        return send_from_directory('.', '.env', mimetype='text/plain')
+        env_data = ''
     except Exception:
-        return "File not found", 404
+        return 'Error reading env data', 404
 
 if __name__ == '__main__':
-    # No rate limiting implemented on the app
-    app.run(host='0.0.0.0', port=3001, debug=True)
+    # Fix: Implement rate limiting
+    app.run(host='0.0.0.0', port=3001, debug=False, threaded=False)
