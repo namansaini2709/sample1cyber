@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_from_directory, make_response
 import sqlite3
 import os
+import bleach
 
 app = Flask(__name__)
 app.secret_key = 'super_secret_session_key' # Insecure static key
@@ -26,14 +27,18 @@ def index():
     if query:
         # Simple search
         c.execute("SELECT * FROM products WHERE name LIKE ?", ('%' + query + '%',))
+        products = c.fetchall()
+        conn.close()
+        
+        # Apply input validation and sanitization
+        query = bleach.clean(query)
+        return render_template('index.html', products=products, query=query)
     else:
         c.execute("SELECT * FROM products")
+        products = c.fetchall()
+        conn.close()
         
-    products = c.fetchall()
-    conn.close()
-    
-    # XSS vulnerability: Render query directly to template (we'll implement the actual XSS in the template)
-    return render_template('index.html', products=products, query=query)
+    return render_template('index.html', products=products, query='')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
