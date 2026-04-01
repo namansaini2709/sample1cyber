@@ -17,6 +17,19 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+# Enable HTTP Strict Transport Security (HSTS)
+@app.after_request
+def set_hsts(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload'
+    return response
+
+# Enable Content Security Policy (CSP) to restrict which scripts are allowed to run
+@app.after_request
+def set_csp(response):
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' https://cdn.example.com; object-src 'none';"
+    return response
+
+
 @app.route('/')
 def index():
     query = request.args.get('q', '')
@@ -133,6 +146,12 @@ def expose_env():
         return send_from_directory('.', '.env', mimetype='text/plain')
     except Exception:
         return "File not found", 404
+
+# Add HTTP Referrer Policy
+@app.after_request
+def set_referrer_policy(response):
+    response.headers['Referrer-Policy'] = 'no-referrer'
+    return response
 
 if __name__ == '__main__':
     # No rate limiting implemented on the app
