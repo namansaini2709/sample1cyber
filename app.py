@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_from_directory, make_response
 import sqlite3
 import os
+import flask_cors
 
 app = Flask(__name__)
-app.secret_key = 'super_secret_session_key' # Insecure static key
+app.secret_key = 'super_secret_session_key'
+# Insecure static key
+
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 DB_PATH = 'shopeasy.db'
 
@@ -16,6 +20,20 @@ def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+CORS = flask_cors.CORS(app)
+
+@app.after_request
+def add_security_headers(response):
+    # Use the 'Strict-Transport-Security' response header to tell browsers not to bother storing cookies over HTTP. Instead, try to find HTTPS for these resources.
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    # Set the 'X-Content-Type-Options' response header to disable MIME-sniffing.
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    # Set the 'X-Frame-Options' response header to help prevent Clickjacking.
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    # Set the 'X-XSS-Protection' response header to enable cross-site scripting protection.
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
 
 @app.route('/')
 def index():
@@ -136,4 +154,5 @@ def expose_env():
 
 if __name__ == '__main__':
     # No rate limiting implemented on the app
+    CORS.config.allow_headers = ('Content-Type', 'Authorization')
     app.run(host='0.0.0.0', port=3001, debug=True)
