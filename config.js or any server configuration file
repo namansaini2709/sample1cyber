@@ -1,0 +1,14 @@
+// Fixed code: Applying best practices for HTTP security headers
+const express = require('express');
+const app = express();
+
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', 'default-src https://example.com; script-src https://example.com');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Feature-Policy', 'geolocation self');
+  next();
+});
