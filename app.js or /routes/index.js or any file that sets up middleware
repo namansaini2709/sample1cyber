@@ -1,0 +1,9 @@
+<the recommended fix would look like this>
+
+app.use((req, res, next) => {
+  res.header('Content-Security-Policy', 'default-src 'self' https://*.cyber.com; script-src 'self' https://code.jquery.com; style-src 'self' https://fonts.googleapis.com; upgrade-insecure-requests');
+  res.header('X-Frame-Options', 'SAMEORIGIN');
+  res.header('X-Content-Type-Options', 'nosniff');
+  res.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
