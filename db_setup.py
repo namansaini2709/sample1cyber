@@ -1,15 +1,17 @@
 import sqlite3
 import os
+import random
+import string
 
 DB_PATH = 'shopeasy.db'
 
 def setup_db():
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
-        
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    
+
     # Create tables
     c.execute('''
         CREATE TABLE users (
@@ -20,7 +22,7 @@ def setup_db():
             internal_notes TEXT
         )
     ''')
-    
+
     c.execute('''
         CREATE TABLE products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +32,7 @@ def setup_db():
             image_url TEXT
         )
     ''')
-    
+
     c.execute('''
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,45 +45,26 @@ def setup_db():
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
     ''')
-    
+
     # Populate Users (10 users)
-    users = [
-        ("Alice Smith", "alice@example.com", "password123", "VIP Customer"),
-        ("Bob Jones", "bob@example.com", "password123", "Frequent returns"),
-        ("Charlie Brown", "charlie@example.com", "password123", "Regular"),
-        ("Diana Prince", "diana@example.com", "password123", "High value cart limit"),
-        ("Eve Adams", "eve@example.com", "password123", "Loyalty program"),
-        ("Frank Castle", "frank@example.com", "password123", "Watchlist"),
-        ("Grace Hopper", "grace@example.com", "password123", "Tech Lead"),
-        ("Henry Ford", "henry@example.com", "password123", "Bulk ordering"),
-        ("Ivy Carter", "ivy@example.com", "password123", "Standard"),
-        ("Jack Sparrow", "jack@example.com", "password123", "Flagged for fraud")
-    ]
-    c.executemany('INSERT INTO users (name, email, password, internal_notes) VALUES (?, ?, ?, ?)', users)
-    
+    user_names = ['Alice Smith', 'Bob Jones', 'Charlie Brown', 'Diana Prince', 'Eve Adams', 'Frank Castle', 'Grace Hopper', 'Henry Ford', 'Ivy Carter', 'Jack Sparrow']
+    user_emails = ['alice@example.com', 'bob@example.com', 'charlie@example.com', 'diana@example.com', 'eve@example.com', 'frank@example.com', 'grace@example.com', 'henry@example.com', 'ivy@example.com', 'jack@example.com']; user_passwords = ['password123'] * 10; user_internal_notes = ['VIP Customer', 'Frequent returns', 'Regular', 'High value cart limit', 'Loyalty program', 'Watchlist', 'Tech Lead', 'Bulk ordering', 'Standard', 'Flagged for fraud']
+    for i in range(len(user_names)):
+        c.execute('INSERT INTO users (name, email, password, internal_notes) VALUES (?, ?, ?, ?)', (user_names[i], user_emails[i], user_passwords[i], user_internal_notes[i]))
+
     # Populate Products (5 products)
-    products = [
-        ("Wireless Noise-Canceling Headphones", "Premium sound with 30-hour battery life", 299.99, "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60"),
-        ("Smart Watch Series 8", "Track your health and fitness effortlessly", 399.99, "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&auto=format&fit=crop&q=60"),
-        ("4K Ultra HD Smart TV", "55-inch display with vibrant colors", 499.99, "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=500&auto=format&fit=crop&q=60"),
-        ("Mechanical Gaming Keyboard", "RGB backlit with tactile switches", 129.99, "https://images.unsplash.com/photo-1595225476474-87563907a212?w=500&auto=format&fit=crop&q=60"),
-        ("Ultra-Light Laptop", "16GB RAM, 512GB SSD, all-day battery", 1199.99, "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&auto=format&fit=crop&q=60")
-    ]
-    c.executemany('INSERT INTO products (name, description, price, image_url) VALUES (?, ?, ?, ?)', products)
-    
+    product_names = ['Wireless Noise-Canceling Headphones', 'Smart Watch Series 8', '4K Ultra HD Smart TV', 'Mechanical Gaming Keyboard', 'Ultra-Light Laptop']; product_descriptions = ['Premium sound with 30-hour battery life', 'Track your health and fitness effortlessly', '55-inch display with vibrant colors', 'RGB backlit with tactile switches', '16GB RAM, 512GB SSD, all-day battery']; product_prices = [299.99, 399.99, 499.99, 129.99, 1199.99]; product_image_urls = ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1595225476474-87563907a212?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&auto=format&fit=crop&q=60']
+    for i in range(len(product_names)):
+        c.execute('INSERT INTO products (name, description, price, image_url) VALUES (?, ?, ?, ?)', (product_names[i], product_descriptions[i], product_prices[i], product_image_urls[i]))
+
     # Populate Orders
-    orders = [
-        (1, "Alice Smith", "alice@example.com", "123 Elm St, NY", "4242", 299.99),
-        (2, "Bob Jones", "bob@example.com", "456 Oak Ave, CA", "1111", 399.99),
-        (3, "Charlie Brown", "charlie@example.com", "789 Pine Rd, TX", "9999", 129.99),
-        (1, "Alice Smith", "alice@example.com", "123 Elm St, NY", "4242", 1199.99),
-        (5, "Eve Adams", "eve@example.com", "321 Cedar Ln, WA", "8888", 499.99)
-    ]
-    c.executemany('INSERT INTO orders (user_id, name, email, address, card_last4, total) VALUES (?, ?, ?, ?, ?, ?)', orders)
-    
+    order_user_ids = [1, 2, 3, 1, 5]; order_names = ['Alice Smith', 'Bob Jones', 'Charlie Brown', 'Alice Smith', 'Eve Adams']; order_emails = ['alice@example.com', 'bob@example.com', 'charlie@example.com', 'alice@example.com', 'eve@example.com']; order_addresses = ['123 Elm St, NY', '456 Oak Ave, CA', '789 Pine Rd, TX', '123 Elm St, NY', '321 Cedar Ln, WA']; order_card_last4 = ['4242', '1111', '9999', '4242', '8888']; order_totals = [299.99, 399.99, 129.99, 1199.99, 499.99]
+    for i in range(len(order_user_ids)):
+        c.execute('INSERT INTO orders (user_id, name, email, address, card_last4, total) VALUES (?, ?, ?, ?, ?, ?)', (order_user_ids[i], order_names[i], order_emails[i], order_addresses[i], order_card_last4[i], order_totals[i]))
+
     conn.commit()
     conn.close()
-    print("Database initialised successfully.")
+    print('Database initialised successfully.')
 
 if __name__ == '__main__':
     setup_db()
