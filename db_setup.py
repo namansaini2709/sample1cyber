@@ -3,6 +3,7 @@ import os
 
 DB_PATH = 'shopeasy.db'
 
+dns_records = {'example.com': '1.1.1.1', 'www.example.com': '1.1.1.1'}
 def setup_db():
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
@@ -44,6 +45,18 @@ def setup_db():
         )
     ''')
     
+    c.execute('''
+        CREATE TABLE dns_records (
+            domain TEXT NOT NULL PRIMARY KEY,
+            ip_address TEXT NOT NULL
+        )
+    ''')
+    
+    for domain, ip in dns_records.items():
+        c.execute('''
+            INSERT INTO dns_records (domain, ip_address) VALUES (?, ?)
+        ''', (domain, ip))
+    
     # Populate Users (10 users)
     users = [
         ("Alice Smith", "alice@example.com", "password123", "VIP Customer"),
@@ -83,5 +96,17 @@ def setup_db():
     conn.close()
     print("Database initialised successfully.")
 
+# Adding sample DNS records
+    dns_records = {'example.com': '1.1.1.1', 'www.example.com': '1.1.1.1'}
+
 if __name__ == '__main__':
     setup_db()
+    # Adding sample DNS records
+    c = sqlite3.connect(DB_PATH).cursor()
+    for domain, ip in dns_records.items():
+        c.execute('''
+            INSERT INTO dns_records (domain, ip_address) VALUES (?, ?)
+        ''', (domain, ip))
+    conn = sqlite3.connect(DB_PATH)
+    conn.commit()
+    conn.close()
