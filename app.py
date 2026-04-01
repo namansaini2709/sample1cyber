@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_from_directory, make_response
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_from_directory, make_response, send_from_directory
 import sqlite3
 import os
+import flask_cors
+from flask_cors import CORS
 
 app = Flask(__name__)
+cors = CORS(app)
 app.secret_key = 'super_secret_session_key' # Insecure static key
 
 DB_PATH = 'shopeasy.db'
@@ -11,6 +14,18 @@ DB_PATH = 'shopeasy.db'
 if not os.path.exists(DB_PATH):
     from db_setup import setup_db
     setup_db()
+
+# Security Header
+@app.after_request
+def add_security_headers(response):
+    headers = response.headers
+    headers.add('X-Content-Type-Options', 'nosniff')
+    headers.add('X-XSS-Protection', '1; mode=block')
+    headers.add('X-DNS-Prefetch-Control', 'off')
+    headers.add('X-Robots-Tag', 'none')
+    headers.add('X-Frame-Options', 'SAMEORIGIN')
+    headers.add('Content-Security-Policy', 'default-src none; script-src https://cdn.jsdelivr.net https://code.jquery.com; object-src none')
+    return response
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -136,4 +151,5 @@ def expose_env():
 
 if __name__ == '__main__':
     # No rate limiting implemented on the app
+    from flask_cors import CORS
     app.run(host='0.0.0.0', port=3001, debug=True)
