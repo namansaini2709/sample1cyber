@@ -17,6 +17,20 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+app.config['SECURITY_HEADERS'] = { "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; object-src 'none'; frame-src 'self';",
+  "X-Frame-Options": "SAMEORIGIN",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "same-origin",
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+  "X-Content-Type-Options": "nosniff"
+}
+
+@app.after_request
+def add_security_headers(response):
+    for header in app.config['SECURITY_HEADERS']:
+        response.headers[header] = app.config['SECURITY_HEADERS'][header]
+    return response
+
 @app.route('/')
 def index():
     query = request.args.get('q', '')
@@ -121,7 +135,10 @@ def user_profile():
     
     if user:
         # VULNERABLE: Returning full user object including password hash and internal notes
-        return jsonify(dict(user))
+        response = make_response(jsonify(dict(user)))
+        response.set_cookie('user',value = json.dumps(dict(user)))
+        response.set_cookie('session_id',value = 'session_id',expires = 1)
+        return response
     return jsonify({"error": "User not found"}), 404
 
 @app.route('/.env')
