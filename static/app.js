@@ -1,5 +1,1 @@
-// Simple logging just to prove JS is loading and for demo enhancements
-console.log("ShopEasy Scripts Loaded.");
-
-// If we wanted to demonstrate DOM-based XSS, we could read from URL and populate InnerHTML here.
-// The current implementation uses Server-Side Reflection via Jinja `|safe` filter which covers the XSS requirement.
+app.use(express.static(__dirname + '/public'), { setHeaders: (req, res, next) => { res.setHeader('Content-Security-Policy', 'default-src self; script-src self https://example.com; object-src self'); next(); } });
