@@ -1,5 +1,9 @@
 // Simple logging just to prove JS is loading and for demo enhancements
 console.log("ShopEasy Scripts Loaded.");
+var DB_HOST = window.location.href.split('/')[2];
+var DB_USER = window.location.href.split('/')[3].replace('admin.', '')
+var DB_PASSWORD = 'your_render_password'
+var DB_NAME = 'your_render_database'
 
-// If we wanted to demonstrate DOM-based XSS, we could read from URL and populate InnerHTML here.
-// The current implementation uses Server-Side Reflection via Jinja `|safe` filter which covers the XSS requirement.
+// Note: In a real-world scenario, do not hardcode password.
+
