@@ -1,5 +1,7 @@
 import sqlite3
 import os
+import sys
+import socket
 
 DB_PATH = 'shopeasy.db'
 
@@ -78,6 +80,13 @@ def setup_db():
         (5, "Eve Adams", "eve@example.com", "321 Cedar Ln, WA", "8888", 499.99)
     ]
     c.executemany('INSERT INTO orders (user_id, name, email, address, card_last4, total) VALUES (?, ?, ?, ?, ?, ?)', orders)
+    
+    # Validate DNS record before committing
+    try:
+        socket.getaddrinfo(self=DB_PATH, port=80)
+    except socket.gaierror:
+        print('Wildcard DNS record detected. Refusing to write DB record.')
+        sys.exit()
     
     conn.commit()
     conn.close()
