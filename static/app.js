@@ -1,5 +1,1 @@
-// Simple logging just to prove JS is loading and for demo enhancements
-console.log("ShopEasy Scripts Loaded.");
-
-// If we wanted to demonstrate DOM-based XSS, we could read from URL and populate InnerHTML here.
-// The current implementation uses Server-Side Reflection via Jinja `|safe` filter which covers the XSS requirement.
+if (req.url === '/'):  const validatedUrl = validateUrl(req.url);  if (validatedUrl): res.end('Welcome to Sample1 Cyber' else res.status(400).end('Invalid URL')
