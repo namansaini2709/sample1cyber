@@ -1,5 +1,8 @@
-// Simple logging just to prove JS is loading and for demo enhancements
-console.log("ShopEasy Scripts Loaded.");
+// Recommended secure approach using .env file with restricted access
+const dotenv = require('dotenv');
 
-// If we wanted to demonstrate DOM-based XSS, we could read from URL and populate InnerHTML here.
-// The current implementation uses Server-Side Reflection via Jinja `|safe` filter which covers the XSS requirement.
+// Load .env file in the main entry point of the application
+process.env.NODE_ENV === 'production' ? dotenv.config({ path: __dirname + '/.env' }) : dotenv.config({ silent: true });
+
+// Use a secure secrets manager or a dedicated environment config service in the app
+const mySecretKey = process.env.MY_SECRET_KEY;
