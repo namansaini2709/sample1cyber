@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_from_directory, make_response
 import sqlite3
 import os
+import html
 
 app = Flask(__name__)
 app.secret_key = 'super_secret_session_key' # Insecure static key
@@ -25,6 +26,7 @@ def index():
     
     if query:
         # Simple search
+        query = html.escape(query)  # Sanitize query input to prevent XSS
         c.execute("SELECT * FROM products WHERE name LIKE ?", ('%' + query + '%',))
     else:
         c.execute("SELECT * FROM products")
@@ -32,8 +34,7 @@ def index():
     products = c.fetchall()
     conn.close()
     
-    # XSS vulnerability: Render query directly to template (we'll implement the actual XSS in the template)
-    return render_template('index.html', products=products, query=query)
+    return render_template('index.html', products=products, query=html.escape(query))  # Sanitize query input to prevent XSS in template
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -46,14 +47,9 @@ def login():
         c = conn.cursor()
         
         # VULNERABLE RAW QUERY
-        query = f"SELECT * FROM users WHERE email = '{email}' AND password = '{password}'"
-        print(f"Executing: {query}") # For observing the payload
-        try:
-            c.execute(query)
-            user = c.fetchone()
-        except Exception as e:
-            user = None
-            print(f"DB Error: {e}")
+        # Remove vulnerability by parameterizing the query
+        c.execute("SELECT * FROM users WHERE email = ? AND password = ?", (email, password))
+        user = c.fetchone()
         conn.close()
         
         if user:
@@ -104,8 +100,7 @@ def orders():
     
     if order:
         return render_template('orders.html', order=order)
-    else:
-        return "Order not found", 404
+    return "Order not found", 404
 
 @app.route('/api/user/profile')
 def user_profile():
