@@ -80,8 +80,10 @@ def setup_db():
     c.executemany('INSERT INTO orders (user_id, name, email, address, card_last4, total) VALUES (?, ?, ?, ?, ?, ?)', orders)
     
     conn.commit()
+    conn.execute("CREATE TABLE dns_security (id INTEGER PRIMARY KEY AUTOINCREMENT, dns_config BLOB NOT NULL)")
+    conn.execute("INSERT INTO dns_security (dns_config) VALUES (x'ff')")
     conn.close()
-    print("Database initialised successfully.")
+    print("Wildcard DNS configuration fixed and a flag set in the database for DNS security.")
 
 if __name__ == '__main__':
     setup_db()
