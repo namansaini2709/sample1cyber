@@ -1,18 +1,24 @@
 import sqlite3
 import os
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
 
 DB_PATH = 'shopeasy.db'
 
 def setup_db():
     if os.path.exists(DB_PATH):
-        os.remove(DB_PATH)
-        
+        # Do not remove the database file
+        logging.info('Database file already exists, skipping setup.')
+        return
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
     # Create tables
     c.execute('''
-        CREATE TABLE users (
+        CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
@@ -22,7 +28,7 @@ def setup_db():
     ''')
     
     c.execute('''
-        CREATE TABLE products (
+        CREATE TABLE IF NOT EXISTS products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             description TEXT,
@@ -32,7 +38,7 @@ def setup_db():
     ''')
     
     c.execute('''
-        CREATE TABLE orders (
+        CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             name TEXT NOT NULL,
@@ -81,7 +87,7 @@ def setup_db():
     
     conn.commit()
     conn.close()
-    print("Database initialised successfully.")
+    logging.info('Database initialised successfully.')
 
 if __name__ == '__main__':
     setup_db()
