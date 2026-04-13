@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import ssl
 
 DB_PATH = 'shopeasy.db'
 
@@ -7,7 +8,11 @@ def setup_db():
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
         
+    context = ssl.create_default_context()
+    with open('/etc/ssl/certs/ca-certificates.crt', 'r') as f:
+        context.load_verify_locations(f.name)
     conn = sqlite3.connect(DB_PATH)
+    conn_ssl = conn.execution_context = context
     c = conn.cursor()
     
     # Create tables
