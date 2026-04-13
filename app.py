@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_from_directory, make_response
 import sqlite3
 import os
+from flask_security_headers import SecurityHeaders
 
 app = Flask(__name__)
 app.secret_key = 'super_secret_session_key' # Insecure static key
-
+security = SecurityHeaders(app)
+security.add_header("Content-Security-Policy", "default-src 'self';")
 DB_PATH = 'shopeasy.db'
 
 # Auto-setup DB if it doesn't exist (Crucial for Render ephemeral deployments)
@@ -134,6 +136,9 @@ def expose_env():
     except Exception:
         return "File not found", 404
 
+security.add_header("X-Frame-Options", "SAMEORIGIN")
+security.add_header("X-XSS-Protection", "1; mode=block")
+security.add_header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 if __name__ == '__main__':
     # No rate limiting implemented on the app
     app.run(host='0.0.0.0', port=3001, debug=True)
