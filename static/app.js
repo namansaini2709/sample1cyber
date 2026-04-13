@@ -1,5 +1,14 @@
-// Simple logging just to prove JS is loading and for demo enhancements
-console.log("ShopEasy Scripts Loaded.");
+const authenticate = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.status(401).send({ error: 'Unauthorized' });
+};
 
-// If we wanted to demonstrate DOM-based XSS, we could read from URL and populate InnerHTML here.
-// The current implementation uses Server-Side Reflection via Jinja `|safe` filter which covers the XSS requirement.
+app.get('/api/v1/sample', authenticate, (req, res) => {
+    if (req.user) {
+        res.json({ message: 'Hello' });
+    } else {
+        res.status(403).send({ error: 'Forbidden' });
+    }
+});
